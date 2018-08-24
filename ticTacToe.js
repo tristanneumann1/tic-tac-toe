@@ -20,14 +20,14 @@ if(process.argv.length === 2) {
     path.join(__dirname, '/board.json'),
     (err, gameData) => {
       const game = JSON.parse(gameData);
-      if(move(...moves[process.argv[2]], game.player, game.board)) {
+      if(move(...moves[process.argv[2]], game)) {
         console.log(`${game.player} has won!!`);
         logBoard(game.board);
         game.board = initialiseBoard();
         return;
       };
       logBoard(game.board);
-      console.log(`Player ${swapPlayer(game.player)}, your move;\n`);
+      console.log(`Player ${game.player}, your move;\n`);
     }
   )
 }
@@ -36,12 +36,16 @@ function logBoard(board) {
   console.log(`_______________\n| ${board[0]} |\n| ${board[1]} |\n| ${board[2]} |\n|_____________|\n`);
 }
 
-function move(i, j, player, board) {
-  board[i][j] = player;
-  writeBoard(board, swapPlayer(player), (err) => {
+function move(i, j, game) {
+  if(game.board[i][j] !== '   ') {
+    console.log('\nIllegal move, try again:');
+    return false;
+  }
+  game.board[i][j] = game.player;
+  writeBoard(game.board, game.player = swapPlayer(game.player), (err) => {
     if(err) { console.error(err); }
   });
-  let win = checkRow(board, i) || checkColumn(board, j) || checkDiag(board);
+  let win = checkRow(game.board, i) || checkColumn(game.board, j) || checkDiag(game.board);
   return win;
 }
 
