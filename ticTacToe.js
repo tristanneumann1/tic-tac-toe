@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+var prompt = require ('prompt');
 
 const moves = {
   7: [0, 0],
@@ -20,20 +21,45 @@ if(process.argv.length === 2) {
     path.join(__dirname, '/board.json'),
     (err, gameData) => {
       const game = JSON.parse(gameData);
-      if(move(...moves[process.argv[2]], game)) {
+      let win = move(...moves[process.argv[2]], game);
+      if(win === 1) {
         console.log(`${game.player} has won!!`);
         logBoard(game.board);
-        game.board = initialiseBoard();
+        promptRestart();
         return;
-      };
-      logBoard(game.board);
-      console.log(`Player ${game.player}, your move;\n`);
+      } else if(win === 0){
+        logBoard(game.board);
+        console.log(`Player ${game.player}, your move;\n`);
+      } else {
+        console.log('\n TIE\n');
+        promptRestart();
+      }
     }
   )
 }
 
-function logBoard(board) {
-  console.log(`_______________\n| ${board[0]} |\n| ${board[1]} |\n| ${board[2]} |\n|_____________|\n`);
+function promptRestart() {
+  console.log(' \n Would you like a restart? (y/n)\n');
+  prompt.start();
+  prompt.get(['restart'], (err, restart) => {
+    if(err) {
+      console.error(err);
+    } else {
+      if(restart.restart === 'y') {
+        initialiseBoard();
+      } else {
+        console.log('\nThanks for playing!!')
+      }
+    }
+  });
+}
+
+function logBoard(board, start) {
+  if(start) {
+    console.log(`_______________\n| ${[' 7 ', ' 8 ', ' 9 ']} |\n| ${[' 4 ', ' 5 ', ' 6 ']} |\n| ${[' 1 ', ' 2 ', ' 3 ']} |\n|_____________|\n`);
+  } else {
+    console.log(`_______________\n| ${board[0]} |\n| ${board[1]} |\n| ${board[2]} |\n|_____________|\n`);
+  }
 }
 
 function move(i, j, game) {
@@ -42,17 +68,21 @@ function move(i, j, game) {
     return false;
   }
   game.board[i][j] = game.player;
-  writeBoard(game.board, game.player = swapPlayer(game.player), (err) => {
+  writeBoard(game.board, game.player = swapPlayer(game.player), game.counter + 1, (err) => {
     if(err) { console.error(err); }
   });
   let win = checkRow(game.board, i) || checkColumn(game.board, j) || checkDiag(game.board);
-  return win;
+  if(!win && game.counter === 8) {
+    return 2;
+  }
+  return +win;
 }
 
-function writeBoard(board, player, cb) {
+function writeBoard(board, player, counter, cb) {
   fs.writeFile(path.join(__dirname, '/board.json'), JSON.stringify({
     board: board,
     player: player,
+    counter: counter,
   }), cb);
 }
 
@@ -90,13 +120,13 @@ function initialiseBoard() {
     ['   ', '   ', '   '],
     ['   ', '   ', '   ']
   ];
-  console.log('WELCOME TO MY TIC TAC TOE');
-  writeBoard(board, ' X ', (err, data) => {
+  console.log('\n===================================================================================================================================\n\nWELCOME TO MY TIC TAC TOE');
+  writeBoard(board, ' X ', 0, (err, data) => {
      if(err) {
        console.error(err);
       } else {
         console.log('\n BOARD INITIALISED,\n Player 1, make your move\n');
-        logBoard(board);
+        logBoard(board, true);
         console.log('Player X begin;\n')
       }
   });
