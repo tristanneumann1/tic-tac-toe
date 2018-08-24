@@ -1,31 +1,33 @@
 const fs = require('fs');
 const path = require('path');
 
+const moves = {
+  7: [0, 0],
+  8: [0, 1],
+  9: [0, 2],
+  4: [1, 0],
+  5: [1, 1],
+  6: [1, 2],
+  1: [2, 0],
+  2: [2, 1],
+  3: [2, 2],
+};
+
 if(process.argv.length === 2) {
-  const board = [
-    ['   ', '   ', '   '],
-    ['   ', '   ', '   '],
-    ['   ', '   ', '   ']
-  ];
-  console.log('WELCOME TO MY TIC TAC TOE');
-  writeBoard(board, ' X ', (err, data) => {
-     if(err) {
-       console.error(err);
-      } else {
-        console.log('\n BOARD INITIALISED,\n Player 1, make your move\n');
-        logBoard(board);
-      }
-  });
+  initialiseBoard();
 } else {
   fs.readFile(
     path.join(__dirname, '/board.json'),
     (err, gameData) => {
       const game = JSON.parse(gameData);
-      if(move(process.argv[2], process.argv[3], game.player, game.board)) {
-        console.log(`${game.player} has won`);
+      if(move(...moves[process.argv[2]], game.player, game.board)) {
+        console.log(`${game.player} has won!!`);
+        logBoard(game.board);
+        game.board = initialiseBoard();
         return;
       };
       logBoard(game.board);
+      console.log(`Player ${swapPlayer(game.player)}, your move;\n`);
     }
   )
 }
@@ -76,4 +78,22 @@ function checkDiag(board) {
     return true;
   }
   return false;
+}
+
+function initialiseBoard() {
+  const board = [
+    ['   ', '   ', '   '],
+    ['   ', '   ', '   '],
+    ['   ', '   ', '   ']
+  ];
+  console.log('WELCOME TO MY TIC TAC TOE');
+  writeBoard(board, ' X ', (err, data) => {
+     if(err) {
+       console.error(err);
+      } else {
+        console.log('\n BOARD INITIALISED,\n Player 1, make your move\n');
+        logBoard(board);
+        console.log('Player X begin;\n')
+      }
+  });
 }
