@@ -21,7 +21,10 @@ if(process.argv.length === 2) {
     path.join(__dirname, '/board.json'),
     (err, gameData) => {
       const game = JSON.parse(gameData);
-      move(process.argv[2], process.argv[3], game.player, game.board);
+      if(move(process.argv[2], process.argv[3], game.player, game.board)) {
+        console.log(`${game.player} has won`);
+        return;
+      };
       logBoard(game.board);
     }
   )
@@ -36,9 +39,8 @@ function move(i, j, player, board) {
   writeBoard(board, swapPlayer(player), (err) => {
     if(err) { console.error(err); }
   });
-  // checkRow(i);
-  // checkColumn(j);
-  // checkDiag();
+  let win = checkRow(board, i) || checkColumn(board, j) || checkDiag(board);
+  return win;
 }
 
 function writeBoard(board, player, cb) {
@@ -50,4 +52,28 @@ function writeBoard(board, player, cb) {
 
 function swapPlayer(player) {
   return (player === ' X ') ? ' O ' : ' X ';
+}
+
+function checkRow(board, i) {
+  if(board[i][0] !== '   ' && board[i][0] === board[i][1] && board[i][0] === board[i][2]) {
+    return true;
+  }
+  return false;
+}
+
+function checkColumn(board, j) {
+  if(board[0][j] !== '   ' && board[0][j] === board[1][j] && board[0][j] === board[2][j]) {
+    return true;
+  }
+  return false;
+}
+
+function checkDiag(board) {
+  if(board[0][0] !== '   ' && board[0][0] === board[1][1] && board[0][0] === board[2][2]) {
+    return true;
+  }
+  if(board[0][2] !== '   ' && board[0][2] === board[1][1] && board[0][2] === board[2][0]) {
+    return true;
+  }
+  return false;
 }
