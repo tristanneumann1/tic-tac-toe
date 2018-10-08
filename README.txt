@@ -4,9 +4,8 @@ To install, run:
   npm install
 
 To start game, run:
-  node ticTacToe.js
+  npm start
 
-To make a move on your turn, run:
-  node ticTacToe.js #
+Then use numpad configuration to make your moves, or q to quit
 
-  (where # indicates the position to place your piece: based on numpad configuration)
+Have Fun!
